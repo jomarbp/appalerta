@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sistema de Alertas</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .dashboard-header {
+            margin-bottom: 3rem;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .dashboard-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .dashboard-subtitle {
+            color: var(--color-text-dim);
+            font-size: 1.125rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card.critical .stat-icon {
+            background: rgba(255, 51, 102, 0.2);
+            color: var(--color-danger);
+        }
+
+        .stat-card.high .stat-icon {
+            background: rgba(255, 170, 0, 0.2);
+            color: var(--color-warning);
+        }
+
+        .stat-card.active .stat-icon {
+            background: rgba(0, 240, 255, 0.2);
+            color: var(--color-primary);
+        }
+
+        .stat-card.resolved .stat-icon {
+            background: rgba(0, 255, 136, 0.2);
+            color: var(--color-success);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .chart-card {
+            min-height: 300px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .chart-period {
+            color: var(--color-text-dim);
+            font-size: 0.875rem;
+        }
+
+        .recent-alerts {
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .alert-item {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-left: 4px solid;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: var(--transition);
+            animation: slideIn 0.4s ease;
+        }
+
+        .alert-item:hover {
+            transform: translateX(8px);
+            box-shadow: var(--glow-primary);
+        }
+
+        .alert-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .alert-content {
+            flex: 1;
+        }
+
+        .alert-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            font-size: 1.125rem;
+        }
+
+        .alert-meta {
+            display: flex;
+            gap: 1rem;
+            color: var(--color-text-dim);
+            font-size: 0.875rem;
+        }
+
+        .alert-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-critical {
+            background: rgba(255, 51, 102, 0.2);
+            color: var(--color-danger);
+        }
+
+        .badge-high {
+            background: rgba(255, 170, 0, 0.2);
+            color: var(--color-warning);
+        }
+
+        .badge-medium {
+            background: rgba(255, 170, 0, 0.15);
+            color: #ffaa00;
+        }
+
+        .badge-low {
+            background: rgba(0, 240, 255, 0.2);
+            color: var(--color-primary);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--color-bg-dark);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .action-btn {
+            background: var(--color-bg-card);
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+            color: var(--color-text);
+        }
+
+        .action-btn:hover {
+            border-color: var(--color-primary);
+            box-shadow: var(--glow-primary);
+            transform: translateY(-4px);
+        }
+
+        .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .action-label {
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .quick-actions {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">⚡ Sistema de Alertas</div>
+        <ul class="navbar-menu">
+            <li><a href="dashboard.html" class="active">Dashboard</a></li>
+            <li><a href="alerts.html">Alertas</a></li>
+        </ul>
+        <div class="navbar-user">
+            <span id="userName">Admin</span>
+            <div class="user-avatar" id="userAvatar">A</div>
+            <button class="btn btn-danger" onclick="logout()" style="padding: 0.5rem 1rem; font-size: 0.875rem;">Salir</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">Panel de Control</h1>
+            <p class="dashboard-subtitle">Monitoreo en tiempo real del sistema de alertas</p>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card critical fade-in">
+                <div class="stat-icon">🔴</div>
+                <div class="stat-value" id="criticalCount">0</div>
+                <div class="stat-label">Alertas Críticas</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 0%; background: var(--color-danger);"></div>
+                </div>
+            </div>
+
+            <div class="stat-card high fade-in" style="animation-delay: 0.1s;">
+                <div class="stat-icon">🟠</div>
+                <div class="stat-value" id="highCount">0</div>
+                <div class="stat-label">Alertas Altas</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 0%; background: var(--color-warning);"></div>
+                </div>
+            </div>
+
+            <div class="stat-card active fade-in" style="animation-delay: 0.2s;">
+                <div class="stat-icon">📊</div>
+                <div class="stat-value" id="totalCount">0</div>
+                <div class="stat-label">Total Activas</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 0%; background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));"></div>
+                </div>
+            </div>
+
+            <div class="stat-card resolved fade-in" style="animation-delay: 0.3s;">
+                <div class="stat-icon">✅</div>
+                <div class="stat-value" id="resolvedCount">0</div>
+                <div class="stat-label">Resueltas Hoy</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 0%; background: var(--color-success);"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card recent-alerts fade-in">
+            <div class="section-header">
+                <h2 class="section-title">Alertas Recientes</h2>
+                <a href="alerts.html" class="btn btn-primary" style="padding: 0.5rem 1.5rem; font-size: 0.875rem;">Ver Todas</a>
+            </div>
+            <div id="recentAlertsList"></div>
+        </div>
+
+        <div class="card fade-in">
+            <h2 class="section-title" style="margin-bottom: 1.5rem;">Acciones Rápidas</h2>
+            <div class="quick-actions">
+                <a href="alerts.html" class="action-btn">
+                    <div class="action-icon">➕</div>
+                    <div class="action-label">Nueva Alerta</div>
+                </a>
+                <div class="action-btn" onclick="refreshDashboard()">
+                    <div class="action-icon">🔄</div>
+                    <div class="action-label">Actualizar</div>
+                </div>
+                <div class="action-btn" onclick="exportData()">
+                    <div class="action-icon">📥</div>
+                    <div class="action-label">Exportar</div>
+                </div>
+                <div class="action-btn" onclick="showSettings()">
+                    <div class="action-icon">⚙️</div>
+                    <div class="action-label">Configuración</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Verificar autenticación
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'index.html';
+        }
+
+        // Mostrar nombre de usuario
+        const username = localStorage.getItem('username') || 'Admin';
+        document.getElementById('userName').textContent = username;
+        document.getElementById('userAvatar').textContent = username.charAt(0).toUpperCase();
+
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('username');
+            window.location.href = 'index.html';
+        }
+
+        function loadDashboardData() {
+            const alerts = JSON.parse(localStorage.getItem('alerts') || '[]');
+            
+            // Contar alertas por nivel
+            const critical = alerts.filter(a => a.level === 'critical').length;
+            const high = alerts.filter(a => a.level === 'high').length;
+            const total = alerts.length;
+            
+            // Actualizar contadores
+            document.getElementById('criticalCount').textContent = critical;
+            document.getElementById('highCount').textContent = high;
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('resolvedCount').textContent = Math.floor(Math.random() * 10);
+
+            // Animar barras de progreso
+            setTimeout(() => {
+                document.querySelectorAll('.progress-fill').forEach((bar, index) => {
+                    const values = [
+                        (critical / Math.max(total, 1)) * 100,
+                        (high / Math.max(total, 1)) * 100,
+                        100,
+                        75
+                    ];
+                    bar.style.width = values[index] + '%';
+                });
+            }, 100);
+
+            // Mostrar alertas recientes
+            const recentAlerts = alerts.slice(0, 5);
+            const alertsList = document.getElementById('recentAlertsList');
+            
+            if (recentAlerts.length === 0) {
+                alertsList.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: var(--color-text-dim);">
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">📭</div>
+                        <p>No hay alertas recientes</p>
+                    </div>
+                `;
+            } else {
+                alertsList.innerHTML = recentAlerts.map(alert => {
+                    const icons = {
+                        critical: '🔴',
+                        high: '🟠',
+                        medium: '🟡',
+                        low: '🔵',
+                        info: '🟣'
+                    };
+                    
+                    return `
+                        <div class="alert-item alert-${alert.level}">
+                            <div class="alert-icon" style="background: rgba(${
+                                alert.level === 'critical' ? '255, 51, 102' :
+                                alert.level === 'high' ? '255, 170, 0' :
+                                alert.level === 'medium' ? '255, 170, 0' :
+                                alert.level === 'low' ? '0, 240, 255' : '123, 47, 247'
+                            }, 0.2);">
+                                ${icons[alert.level]}
+                            </div>
+                            <div class="alert-content">
+                                <div class="alert-title">${alert.title}</div>
+                                <div class="alert-meta">
+                                    <span>📍 ${alert.location}</span>
+                                    <span>🕐 ${alert.timestamp}</span>
+                                    <span class="alert-badge badge-${alert.level}">${alert.level}</span>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        function refreshDashboard() {
+            const btn = event.target.closest('.action-btn');
+            btn.style.transform = 'rotate(360deg)';
+            setTimeout(() => {
+                btn.style.transform = '';
+                loadDashboardData();
+            }, 600);
+        }
+
+        function exportData() {
+            const alerts = localStorage.getItem('alerts') || '[]';
+            const blob = new Blob([alerts], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'alertas_' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+        }
+
+        function showSettings() {
+            alert('Configuración del sistema\n\nEsta función estará disponible próximamente.');
+        }
+
+        // Cargar datos al iniciar
+        loadDashboardData();
+
+        // Actualizar cada 30 segundos
+        setInterval(loadDashboardData, 30000);
+    </script>
+</body>
+</html>
